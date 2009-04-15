@@ -1,0 +1,16 @@
+div.sl-google-map {
+border : 1px solid #999;
+width : 98%;
+}
+
+div.sl-google-map-address-lookup {margin-bottom : 1.5em;}
+
+div.sl-google-map-address-lookup label {
+font-weight : bold;
+margin-right : 10px;
+}
+
+input.sl-google-map-address-input {
+margin-right : 10px;
+width : 200px;
+}
