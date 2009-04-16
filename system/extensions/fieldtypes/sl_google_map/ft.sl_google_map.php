@@ -362,6 +362,8 @@ JAVASCRIPT;
 	{
 		global $FF, $TMPL;
 		
+		$pin_center = FALSE;
+		
 		if (isset($params['edit']) &&
 			(strtolower($params['edit']) == 'y' ||
 			strtolower($params['edit']) == 'yes' ||
@@ -386,29 +388,6 @@ JAVASCRIPT;
 					'background'			=> (isset($params['background']) ? $params['background'] : ''),
 					)
 				);
-				
-			// ...but still enable people to override them.
-			if (isset($params['controls']))
-			{
-				$options = explode('|', $params['controls']);
-				$init['options']['ui_zoom'] 		= (array_search('zoom', $options) !== FALSE);
-				$init['options']['ui_scale'] 		= (array_search('scale', $options) !== FALSE);
-				$init['options']['ui_overview'] = (array_search('overview', $options) !== FALSE);
-			}
-			
-			if (isset($params['map']))
-			{
-				$options = explode('|', $params['map']);
-				$init['options']['map_drag'] 				= (array_search('drag', $options) !== FALSE);
-				$init['options']['map_click_zoom']	= (array_search('click_zoom', $options) !== FALSE);
-				$init['options']['map_scroll_zoom']	= (array_search('scroll_zoom', $options) !== FALSE);
-			}
-			
-			if (isset($params['pin']))
-			{
-				$options = explode('|', $params['pin']);
-				$init['options']['pin_drag'] = (array_search('drag', $options) !== FALSE);
-			}
 		}
 		else
 		{
@@ -422,32 +401,40 @@ JAVASCRIPT;
 					'background'	=> (isset($params['background']) ? $params['background'] : '')
 					)
 				);
-			
-			if (isset($params['controls']))
-			{
-				$options = explode('|', $params['controls']);
-				$init['options']['ui_zoom'] 		= (array_search('zoom', $options) !== FALSE);
-				$init['options']['ui_scale'] 		= (array_search('scale', $options) !== FALSE);
-				$init['options']['ui_overview'] = (array_search('overview', $options) !== FALSE);
-			}
-			
-			if (isset($params['map']))
-			{
-				$options = explode('|', $params['map']);
-				$init['options']['map_drag'] 				= (array_search('drag', $options) !== FALSE);
-				$init['options']['map_click_zoom']	= (array_search('click_zoom', $options) !== FALSE);
-				$init['options']['map_scroll_zoom']	= (array_search('scroll_zoom', $options) !== FALSE);
-			}
-			
-			if (isset($params['pin']))
-			{
-				$options = explode('|', $params['pin']);
-				$init['options']['pin_drag'] = (array_search('drag', $options) !== FALSE);
-			}
+		}
+		
+		// Retrieve settings from the tag parameters.
+		if (isset($params['controls']))
+		{
+			$options = explode('|', $params['controls']);
+			$init['options']['ui_zoom'] 		= (array_search('zoom', $options) !== FALSE);
+			$init['options']['ui_scale'] 		= (array_search('scale', $options) !== FALSE);
+			$init['options']['ui_overview'] = (array_search('overview', $options) !== FALSE);
+		}
+		
+		if (isset($params['map']))
+		{
+			$options = explode('|', $params['map']);
+			$init['options']['map_drag'] 				= (array_search('drag', $options) !== FALSE);
+			$init['options']['map_click_zoom']	= (array_search('click_zoom', $options) !== FALSE);
+			$init['options']['map_scroll_zoom']	= (array_search('scroll_zoom', $options) !== FALSE);
+		}
+		
+		if (isset($params['pin']))
+		{
+			$options = explode('|', $params['pin']);
+			$init['options']['pin_drag'] = (array_search('drag', $options) !== FALSE);
+			$pin_center = (array_search('center', $options) !== FALSE);
 		}
 		
 		// Extract the current field data.
 		list($map_lat, $map_lng, $map_zoom, $pin_lat, $pin_lng) = explode(',', $field_data);
+		
+		// Do we need to center the map on the pin location?
+		if ($pin_center)
+		{
+			$field_data = $pin_lat . ',' . $pin_lng . ',' . $map_zoom . ',' . $pin_lat . ',' . $pin_lng;
+		}
 		
 		// Initialisation done, let's get swapping.		
 		$r = preg_replace(
