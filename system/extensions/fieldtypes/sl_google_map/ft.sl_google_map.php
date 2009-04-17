@@ -257,7 +257,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 				$r .= '<input type="hidden"' .
 								' name="' . str_replace('field_id_', 'field_ft_', $field_name) . '"' .
 								' id="' . str_replace('field_id_', 'field_ft_' , $field_name) . '"' .
-								' value="' . $field_data .'" />';
+								' value="none" />';
 			}
 			
 			$r .='</div>';
