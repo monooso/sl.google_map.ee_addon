@@ -2,7 +2,7 @@
 
 /**
  * @package SL Google Map
- * @version 1.0.3
+ * @version 1.0.4
  * @author Stephen Lewis (http://experienceinternet.co.uk/)
  * @copyright Copyright (c) 2009, Stephen Lewis
  * @license http://creativecommons.org/licenses/by-sa/3.0 Creative Commons Attribution-Share Alike 3.0 Unported
@@ -13,7 +13,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	var $info = array(
 		'name'							=> 'SL Google Map',
-		'version'						=> '1.0.3',
+		'version'						=> '1.0.4',
 		'desc'							=> 'Google Map Field Type with full SAEF and weblogs tag support.',
 		'docs_url'					=> 'http://experienceinternet.co.uk/resources/details/sl-google-map/',
 		'versions_xml_url'	=> 'http://experienceinternet.co.uk/addon-versions.xml'
@@ -200,7 +200,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	 * @param			array 		$init 						Initialisation object specifying UI and usage options.
 	 * @return 		string 		The HTML to output.
 	 */	
-	function __display_field($field_name, $field_data, $field_settings, $init)
+	function _display_field($field_name, $field_data, $field_settings, $init)
 	{
 		global $DSP, $LANG;
 
@@ -246,8 +246,21 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		// Additional doo-hickeys if the map is in "editor" mode.
 		if ( ! isset($init['editor']) OR $init['editor'] !== FALSE)
 		{
+			$r .= '<div class="hidden">';
+			
 			// The field to store the map data.
-			$r .= '<div class="hidden"><input type="hidden" name="' . $field_name . '" id="' . $field_name . '" value="' . $field_data .'" /></div>';
+			$r .= '<input type="hidden" name="' . $field_name . '" id="' . $field_name . '" value="' . $field_data .'" />';
+		
+			// If we're not in the control panel (i.e. this is a SAEF), we also need to store the field formatting value.
+			if (isset($init['control_panel']) && $init['control_panel'] === FALSE)
+			{
+				$r .= '<input type="hidden"' .
+								' name="' . str_replace('field_id_', 'field_ft_', $field_name) . '"' .
+								' id="' . str_replace('field_id_', 'field_ft_' , $field_name) . '"' .
+								' value="' . $field_data .'" />';
+			}
+			
+			$r .='</div>';
 
 			// The address finder.
 			$r .= '<div class="sl-google-map-address-lookup">';
@@ -346,7 +359,7 @@ JAVASCRIPT;
 				)
 			);
 			
-		return $this->__display_field($field_name, $field_data, $field_settings, $init);
+		return $this->_display_field($field_name, $field_data, $field_settings, $init);
 	}
 	
 	
@@ -364,6 +377,13 @@ JAVASCRIPT;
 		
 		$pin_center = FALSE;
 		
+		// Extract the fallback text from inside the {map} tag pair.
+		$fallback = preg_replace(
+			'/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s',
+			'$1',
+			$tagdata
+			);
+		
 		if (isset($params['edit']) &&
 			(strtolower($params['edit']) == 'y' ||
 			strtolower($params['edit']) == 'yes' ||
@@ -376,7 +396,7 @@ JAVASCRIPT;
 				'class'					=> (isset($params['class']) ? $params['class'] : ''),
 				'editor'				=> TRUE,
 				'control_panel'	=> FALSE,
-				'fallback'			=> $tagdata,
+				'fallback'			=> $fallback,
 				'options'				=> array(
 					'ui_zoom'					=> TRUE,
 					'ui_scale'				=> TRUE,
@@ -396,7 +416,7 @@ JAVASCRIPT;
 				'class'					=> (isset($params['class']) ? $params['class'] : ''),
 				'editor'				=> FALSE,
 				'control_panel'	=> FALSE,
-				'fallback'			=> $tagdata,
+				'fallback'			=> $fallback,
 				'options'				=> array(
 					'background'	=> (isset($params['background']) ? $params['background'] : '')
 					)
@@ -436,13 +456,13 @@ JAVASCRIPT;
 			$field_data = $pin_lat . ',' . $pin_lng . ',' . $map_zoom . ',' . $pin_lat . ',' . $pin_lng;
 		}
 		
-		// Initialisation done, let's get swapping.		
+		// Initialisation done, let's get swapping.			
 		$r = preg_replace(
 			'/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s',
-			$this->__display_field('field_id_' . $FF->field_id, $field_data, $field_settings, $init),
+			$this->_display_field('field_id_' . $FF->field_id, $field_data, $field_settings, $init),
 			$tagdata
 			);
-			
+		
 		$r = $TMPL->swap_var_single('map_lat', $map_lat, $r);
 		$r = $TMPL->swap_var_single('map_lng', $map_lng, $r);
 		$r = $TMPL->swap_var_single('map_zoom', $map_zoom, $r);
