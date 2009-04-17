@@ -102,9 +102,8 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 				if (this.__map_field.length) {				
 					this.__map_listener = GEvent.addListener(this.__map, 'moveend', function() {
 						var map_data = t.get_location();
-						var pin_data = t.get_marker();
-						
-						field_data = map_data.latlng.lat() + ',' + map_data.latlng.lng() + ',' + map_data.zoom + ',' + pin_data.lat() + ',' + pin_data.lng();
+						var pin_data = t.get_marker();						
+						var field_data = map_data.latlng.lat() + ',' + map_data.latlng.lng() + ',' + map_data.zoom + ',' + pin_data.lat() + ',' + pin_data.lng();
 						t.__map_field.val(field_data);
 					});
 				}
@@ -129,7 +128,13 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 					// Find the specified address.
 					this.__address_submit.unbind('click').bind('click', function(e) {
 						var address = jQuery.trim(t.__address_input.val());
-						if (address !== '') t.pinpoint_address(address);
+						if (address !== '') t.pinpoint_address(address, function() {
+							// Update the map and pin data.
+							var map_data = t.get_location();
+							var pin_data = t.get_marker();						
+							var field_data = map_data.latlng.lat() + ',' + map_data.latlng.lng() + ',' + map_data.zoom + ',' + pin_data.lat() + ',' + pin_data.lng();
+							t.__map_field.val(field_data);
+						});
 						return false;
 					}).parents('form').submit(function(e) {
 						if (t.__in_lookup) {
@@ -223,7 +228,7 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 		/**
 		 * Attempts to locate the given address on the map.
 		 * @param 	string		address			The address to locate (can be a postcode).
-		 * @param		function 	callback		A function to call when we're done (optional).
+		 * @param		function	callback		The function to call when we're all done here (optional).
 		 */		
 		Map.prototype.pinpoint_address = function(address, callback) {
 			var regexp, geo, map, local;
@@ -246,6 +251,10 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 					if (local.results[0]) {
 						t.set_location({lat: local.results[0].lat, lng: local.results[0].lng});
 						t.set_marker({lat: local.results[0].lat, lng: local.results[0].lng});
+						
+						if (callback instanceof Function) {
+							callback();
+						}
 					}
 				});
 
@@ -258,10 +267,16 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 					if (latlng !== null) {
 						t.set_location(latlng);
 						t.set_marker(latlng);
+						
+						if (callback instanceof Function) {
+							callback();
+						}
 					}
 				});
 			} // if - else
+			
 		}
+		
 		
 		// Return our publically-accessible object.
 		return ({Map : Map});	
@@ -272,8 +287,7 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 
 // Create the Google Maps.
 jQuery(document).ready(function() {
-	
-	if (GBrowserIsCompatible() && typeof(SJL.google_maps) !== 'undefined' && SJL.google_maps instanceof Array) {	
+	if (GBrowserIsCompatible() && typeof(SJL.google_maps) !== 'undefined' && SJL.google_maps instanceof Array) {
 		for (var i in SJL.google_maps) {
 			map = new SJL.SLGoogleMap.Map(SJL.google_maps[i].init, SJL.google_maps[i].options);
 		}
