@@ -237,8 +237,9 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 
 		// The map container.
 		$container_id = (isset($init['id']) && $init['id'] != '') ? $init['id'] : $field_name . '_container';
-		$r .= '<div id="' . $container_id . '" class="sl-google-map';		
-		$r .= (isset($init['class']) && $init['class'] != '') ? ' ' . $init['class'] . '"' : '"';
+		$container_class = (isset($init['class']) && $init['class'] != '') ? $init['class'] : 'sl-google-map';
+		
+		$r .= '<div id="' . $container_id . '" class="' . $container_class . '"';
 		$r .= ( ! isset($init['control_panel']) OR $init['control_panel'] !== FALSE) ? ' style="height: ' . $field_settings['map_size'] . 'px; margin-bottom : 1em;">' : '>';
 		$r .= (isset($init['fallback']) && $init['fallback'] != '') ? $init['fallback'] : '<p>' . $LANG->line('publish_no_javascript') . '</p>';
 		$r .= '</div>';
