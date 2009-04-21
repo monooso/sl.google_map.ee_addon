@@ -291,9 +291,12 @@ jQuery(document).ready(function() {
 		for (var i in SJL.google_maps) {
 			map = new SJL.SLGoogleMap.Map(SJL.google_maps[i].init, SJL.google_maps[i].options);
 		}
-	}
-	
+	}	
 });
 
-// Unload the Google Maps stuff.
-jQuery(document).unload(GUnload());
+// Tidy up after ourselves.
+jQuery(window).unload(function() {
+	if (GBrowserIsCompatible()) {
+		GUnload();
+	}
+});
