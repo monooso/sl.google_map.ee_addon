@@ -2,7 +2,7 @@
 
 /**
  * @package SL Google Map
- * @version 1.0.5
+ * @version 1.0.6
  * @author Stephen Lewis (http://experienceinternet.co.uk/)
  * @copyright Copyright (c) 2009, Stephen Lewis
  * @license http://creativecommons.org/licenses/by-sa/3.0 Creative Commons Attribution-Share Alike 3.0 Unported
@@ -12,13 +12,12 @@
 class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	var $requires = array(
-		'ff'		=> '1.0.5',
-		'cp_jquery'		=> '1.2.6'
+		'ff'		=> '1.0.5'
 		);
 	
 	var $info = array(
 		'name'							=> 'SL Google Map',
-		'version'						=> '1.0.5',
+		'version'						=> '1.0.6',
 		'desc'							=> 'Google Map Field Type with full SAEF and weblogs tag support.',
 		'docs_url'					=> 'http://experienceinternet.co.uk/resources/details/sl-google-map/',
 		'versions_xml_url'	=> 'http://experienceinternet.co.uk/addon-versions.xml'
