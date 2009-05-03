@@ -206,7 +206,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	 */	
 	function _display_field($field_name, $field_data, $field_settings, $init)
 	{
-		global $DSP, $LANG;
+		global $LANG;
 
 		// Initialise the return variable.
 		$r = '';
@@ -229,11 +229,8 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		{
 			$this->global_script_included = TRUE;
 
-			// Include the Google Maps scripts. We can't do this using the "include_js" convenience function
-			// because we're calling an external script, so we do it the old fashioned way.
-			$h = '<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=' . $api_key . '&amp;sensor=false"></script>' . "\n";
-			$h .= '<script type="text/javascript" src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=' . $api_key . '"></script>' . "\n";
-			$DSP->extra_header .= $h;
+			$this->insert('body', '<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=' . $api_key . '&amp;sensor=false"></script>');
+			$this->insert('body', '<script type="text/javascript" src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=' . $api_key . '"></script>');
 
 			// Include the custom SL Google Map script.
 			$this->include_js('js/global_script.js');
