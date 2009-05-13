@@ -2,7 +2,7 @@
 
 /**
  * @package SL Google Map
- * @version 1.0.7
+ * @version 1.0.8
  * @author Stephen Lewis (http://experienceinternet.co.uk/)
  * @copyright Copyright (c) 2009, Stephen Lewis
  * @license http://creativecommons.org/licenses/by-sa/3.0 Creative Commons Attribution-Share Alike 3.0 Unported
@@ -18,7 +18,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	var $info = array(
 		'name'							=> 'SL Google Map',
-		'version'						=> '1.0.7',
+		'version'						=> '1.0.8',
 		'desc'							=> 'Google Map Field Type with full SAEF and weblogs tag support.',
 		'docs_url'					=> 'http://experienceinternet.co.uk/resources/details/sl-google-map/',
 		'versions_xml_url'	=> 'http://experienceinternet.co.uk/addon-versions.xml'
@@ -290,11 +290,13 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		$ui_zoom 					= isset($init['options']['ui_zoom']) 					? $init['options']['ui_zoom'] 				: FALSE;
 		$ui_scale 				= isset($init['options']['ui_scale']) 				? $init['options']['ui_scale'] 				: FALSE;
 		$ui_overview 			= isset($init['options']['ui_overview']) 			? $init['options']['ui_overview'] 		: FALSE;
+		$ui_map_type      = isset($init['options']['ui_map_type'])      ? $init['options']['ui_map_type']     : FALSE;
 		$map_drag 				= isset($init['options']['map_drag']) 				? $init['options']['map_drag'] 				: FALSE;
 		$map_click_zoom 	= isset($init['options']['map_click_zoom']) 	? $init['options']['map_click_zoom'] 	: FALSE;
 		$map_scroll_zoom	= isset($init['options']['map_scroll_zoom']) 	? $init['options']['map_scroll_zoom'] : FALSE;
 		$pin_drag 				= isset($init['options']['pin_drag']) 				? $init['options']['pin_drag'] 				: FALSE;
 		$background				= isset($init['options']['background'])				? $init['options']['background']			: NULL;
+		$map_types        = isset($init['options']['map_types'])        ? $init['options']['map_types']       : NULL;
 
 		// The JavaScript to initialise this field.
 		$r .= <<<JAVASCRIPT
@@ -320,11 +322,13 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 			ui_zoom					: '{$ui_zoom}',
 			ui_scale				: '{$ui_scale}',
 			ui_overview			: '{$ui_overview}',
+			ui_map_type     : '{$ui_map_type}',
 			map_drag				: '{$map_drag}',
 			map_click_zoom	: '{$map_click_zoom}',
 			map_scroll_zoom : '{$map_scroll_zoom}',
 			pin_drag				: '{$pin_drag}',
-			background			: '{$background}'
+			background			: '{$background}',
+			map_types       : '{$map_types}'
 		}
 	});
 
@@ -430,9 +434,10 @@ JAVASCRIPT;
 		if (isset($params['controls']))
 		{
 			$options = explode('|', $params['controls']);
-			$init['options']['ui_zoom'] 		= (array_search('zoom', $options) !== FALSE);
-			$init['options']['ui_scale'] 		= (array_search('scale', $options) !== FALSE);
-			$init['options']['ui_overview'] = (array_search('overview', $options) !== FALSE);
+			$init['options']['ui_zoom'] 		  = (array_search('zoom', $options) !== FALSE);
+			$init['options']['ui_scale'] 		  = (array_search('scale', $options) !== FALSE);
+			$init['options']['ui_overview']   = (array_search('overview', $options) !== FALSE);
+			$init['options']['ui_map_type']   = (array_search('map_type', $options) !== FALSE);
 		}
 		
 		if (isset($params['map']))
@@ -448,6 +453,11 @@ JAVASCRIPT;
 			$options = explode('|', $params['pin']);
 			$init['options']['pin_drag'] = (array_search('drag', $options) !== FALSE);
 			$pin_center = (array_search('center', $options) !== FALSE);
+		}
+		
+		if (isset($params['map_types']))
+		{
+		  $init['options']['map_types'] = $params['map_types'];   // Leave it as a pipe-delimited string.
 		}
 		
 		// Extract the current field data.

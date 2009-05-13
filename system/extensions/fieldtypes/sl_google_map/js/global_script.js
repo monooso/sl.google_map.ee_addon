@@ -27,12 +27,24 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 				'ui_zoom'					: false,
 				'ui_scale' 				: false,
 				'ui_overview'			: false,
+				'ui_map_type'			: false,
 				'map_drag'				: false,
 				'map_click_zoom'	: false,
 				'map_scroll_zoom'	: false,
 				'pin_drag'				: false,
-				'background'			: '#FFFFFF'
+				'background'			: '#FFFFFF',
+				'map_types'				: ''
 			}
+			
+			// An index containing the available map types.
+			var valid_map_types = {
+				'hybrid'			: G_HYBRID_MAP,
+				'normal'			: G_NORMAL_MAP,
+				'physical'		: G_PHYSICAL_MAP,
+				'satellite'		: G_SATELLITE_MAP
+			};
+			
+			default_map_type = valid_map_types['normal'];
 			
 			// Override the default options.			
 			for (o in options) {
@@ -47,10 +59,6 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 			
 			// Customise the map UI.			
 			ui = this.__map.getDefaultUI();
-
-			// Can't be doing with implementing the code to remember this right now.
-			ui.controls.maptypecontrol = false;
-			ui.controls.menumaptypecontrol = false;
 			
 			// Everything else is controlled by our map_options object.
 			// - Zoom / pan controls.
@@ -72,8 +80,60 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 			// - Scale control.
 			ui.controls.scalecontrol = map_options.ui_scale;
 			
-			// Set the UI options.
+			// - Map type control.
+			ui.controls.maptypecontrol = ui.controls.menumaptypecontrol = false;			
+			if (this.__map.getSize().width <= 475) {
+				ui.controls.menumaptypecontrol = map_options.ui_map_type;
+			} else {
+				ui.controls.maptypecontrol = map_options.ui_map_type;					
+			}
+			
+			// - Explicitly-set available map types.
+			if (map_options.map_types) {
+				map_types = map_options.map_types.split('|');
+				
+				/**
+				 * At this point in time we have no idea what we've got.
+				 * We assume the worst, and set all the map types to false.
+				 * Then we loop through, activating only those that are explicitly
+				 * required.
+				 *
+				 * In the midst of all this, we also determine the default map type.
+				 */
+				
+				ui.maptypes.normal 			= false;
+				ui.maptypes.satellite		= false;
+				ui.maptypes.hybrid			= false;
+				ui.maptypes.physical		= false;
+								
+				map_types_count 	= map_types.length;
+				default_map_set		= false;
+				
+				for (i = 0; i < map_types_count; i++) {				
+					map_types[i] = map_types[i].toLowerCase();
+					
+					if (valid_map_types[map_types[i]]) {
+						ui.maptypes[map_types[i]] = true;
+						
+						if (!default_map_set) {
+							default_map_type 	= valid_map_types[map_types[i]];
+							default_map_set		= true;
+						}
+					}
+				}
+			}
+			
+			// - Set the default map type.
+			this.__map.setMapType(default_map_type);
+			
+			// - Set the UI options.
 			this.__map.setUI(ui);
+			
+			/**
+			 * @bug
+			 * The overview map always appears as type G_NORMAL_MAP, regardless of the type of the
+			 * main map. There doesn't seem to be a way to change this, or force a refresh of the map.
+			 */
 			
 			// - Overview control (need to do this separately, for reasons best known to Google).
 			if (map_options.ui_overview) {
