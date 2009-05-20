@@ -155,7 +155,7 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 			}			
 			
 			// If we have a "map_field", we need to update it every time our map changes.
-			if (typeof(init.map_field) != 'undefined') {
+			if (typeof(init.map_field) == 'string' && init.map_field.length) {
 				this.__map_field = jQuery('#' + init.map_field);
 			
 				// Add the event listener.
@@ -171,7 +171,7 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 			
 			// If we have an "address_input" field, and an "address_submit" field, we need to
 			// link these to our map.
-			if (typeof(init.address_input) != 'undefined' && typeof(init.address_submit) != 'undefined') {
+			if (typeof(init.address_input) == 'string' && typeof(init.address_submit) == 'string' && init.address_input.length && init.address_submit.length) {
 				this.__address_input 	= jQuery('#' + init.address_input);
 				this.__address_submit	= jQuery('#' + init.address_submit);
 			
