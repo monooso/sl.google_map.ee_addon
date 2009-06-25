@@ -15,7 +15,13 @@ $L = array(
 	'default_latitude'	=> "Default map latitude",
 	'default_longitude'	=> "Default map longitude",
 	'default_zoom'			=> "Default map zoom",
+	'default_map_type'  => "Default map type",
 	'map_size'					=> "Map height (px)",
+	
+	'map_type_hybrid'     => "Hybrid",
+	'map_type_normal'     => "Normal",
+	'map_type_physical'   => "Physical",
+	'map_type_satellite'  => "Satellite",
 	
 	'weblog_default_latitude'		=> "Set the default latitude",
 	'weblog_default_longitude'	=> "Set the default longitude",

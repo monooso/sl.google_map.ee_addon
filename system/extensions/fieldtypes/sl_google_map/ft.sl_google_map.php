@@ -2,7 +2,7 @@
 
 /**
  * @package SL Google Map
- * @version 1.0.9
+ * @version 1.1.0
  * @author Stephen Lewis (http://experienceinternet.co.uk/)
  * @copyright Copyright (c) 2009, Stephen Lewis
  * @license http://creativecommons.org/licenses/by-sa/3.0 Creative Commons Attribution-Share Alike 3.0 Unported
@@ -10,6 +10,12 @@
 */
 
 class Sl_google_map extends Fieldframe_Fieldtype {
+  
+  // Map types.
+  const HYBRID     = 'hybrid';
+  const NORMAL     = 'normal';
+  const PHYSICAL   = 'physical';
+  const SATELLITE  = 'satellite';  
 	
 	var $requires = array(
 		'ff'		    => '1.0.5',
@@ -18,7 +24,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	var $info = array(
 		'name'							=> 'SL Google Map',
-		'version'						=> '1.0.9',
+		'version'						=> '1.1.0',
 		'desc'							=> 'Google Map Field Type with full SAEF and weblogs tag support.',
 		'docs_url'					=> 'http://experienceinternet.co.uk/resources/details/sl-google-map/',
 		'versions_xml_url'	=> 'http://experienceinternet.co.uk/addon-versions.xml'
@@ -28,7 +34,8 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		'map_lat'		=> 39.368,
 		'map_lng'		=> -1.406,
 		'map_zoom'	=> 1,
-		'map_size'	=> 400
+		'map_size'	=> 400,
+		'map_type'  => 'normal'
 		);
 		
 		
@@ -38,6 +45,8 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	 */
 	function display_site_settings()
 	{
+	  global $LANG;
+	  
 		// Initialise our return variable.
 		$r = '';
 		
@@ -71,15 +80,28 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 			);
 
 		// Default zoom.
-		$o = array();
-		for ($count = 0; $count <= 17; $count++) {$o[$count . ''] = $count . '';}
+		$options = array();
+		for ($count = 0; $count <= 17; $count++) {$options[$count . ''] = $count . '';}
 
 		$r .= $sd->row(
 			array(
 				$sd->label('default_zoom'),
-				$sd->select('map_zoom', isset($this->site_settings['map_zoom']) ? $this->site_settings['map_zoom'] : $this->default_site_settings['map_zoom'], $o)
+				$sd->select('map_zoom', isset($this->site_settings['map_zoom']) ? $this->site_settings['map_zoom'] : $this->default_site_settings['map_zoom'], $options)
 				)
 			);
+			
+		// Default map type.
+		$options = array(
+		  Sl_google_map::HYBRID     => $LANG->line('map_type_hybrid'),
+			Sl_google_map::NORMAL     => $LANG->line('map_type_normal'),
+			Sl_google_map::PHYSICAL   => $LANG->line('map_type_physical'),
+			Sl_google_map::SATELLITE  => $LANG->line('map_type_satellite')
+		  );
+		
+		$r .= $sd->row(array(
+		  $sd->label('default_map_type'),
+		  $sd->select('map_type', isset($this->site_settings['map_type']) ? $this->site_settings['map_type'] : $this->default_site_settings['map_type'], $options)
+		  ));
 				
 		// Close the settings block.
 		$r .= $sd->block_c();
@@ -145,13 +167,26 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 			));
 
 		// Default map zoom.
-		$o = array();
+		$options = array();
 		for ($count = 0; $count <= 17; $count++) {$options[$count . ''] = $count . '';}
 
 		$c .= $sd->row(array(
 			$sd->label('default_zoom'),
 			$sd->select('map_zoom', isset($field_settings['map_zoom']) ? $field_settings['map_zoom'] : $this->site_settings['map_zoom'], $options)
 			));
+			
+		// Default map type.
+		$options = array(
+		  Sl_google_map::HYBRID     => $LANG->line('map_type_hybrid'),
+			Sl_google_map::NORMAL     => $LANG->line('map_type_normal'),
+			Sl_google_map::PHYSICAL   => $LANG->line('map_type_physical'),
+			Sl_google_map::SATELLITE  => $LANG->line('map_type_satellite')
+		  );
+		
+		$c .= $sd->row(array(
+		  $sd->label('default_map_type'),
+		  $sd->select('map_type', isset($field_settings['map_type']) ? $field_settings['map_type'] : $this->site_settings['map_type'], $options)
+		  ));
 
 		// Close the table.
 		$c .= $sd->block_c();
