@@ -6,12 +6,13 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 		
 		/**
 		 * The Map "class" constructor.
+		 *
 		 * @param 	object 		init 			Initialisation object containing information essential to the construction of the map.
 		 * @param 	object 		options		Map UI options.
 		 */
 		function Map(init, options) {
 						
-			// Check that we have the required information.			
+			// Check that we have the required information.
 			if ( ! init instanceof Object ||
 				typeof(init.map_container) == 'undefined' ||
 				typeof(init.map_lat) == 'undefined' ||

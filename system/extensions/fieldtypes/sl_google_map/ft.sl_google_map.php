@@ -101,23 +101,25 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	        // the current record, and convert the data if required.
 	        foreach ($field_ids AS $field_id)
 	        {
-	          if ($db_data[$field_id] !== '')
+	          $old_map_data = explode(',', $db_data[$field_id]);
+	          if (count($old_map_data) === 5)
 	          {
-	            list($map_lat, $map_lng, $map_zoom, $pin_lat, $pin_lng) = explode(',', $db_data[$field_id]);
-              $update_array[$field_id] = addslashes(serialize(
-                array(
-                  'map_lat' => $map_lat,
-                  'map_lng' => $map_lng,
-                  'map_zoom' => $map_zoom,
-                  'pin_lat' => $pin_lat,
-                  'pin_lng' => $pin_lng
-                  )
-                ));
+	            $map_data = addslashes(serialize(
+	              array(
+	                'map_lat' => $old_map_data[0],
+	                'map_lng' => $old_map_data[1],
+	                'map_zoom' => $old_map_data[2],
+	                'pin_lat' => $old_map_data[3],
+	                'pin_lng' => $old_map_data[4]
+	                )
+	              ));
 	          }
 	          else
 	          {
-	            $update_array[$field_id] = '';
+	            $map_data = '';
 	          }
+	            
+            $update_array[$field_id] = $map_data;
 	          
 	          // Update the record.
 	          $DB->query($DB->update_string(
@@ -297,6 +299,33 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	
 	/**
+	 * Modifies the field data before it is saved to the database.
+	 *
+	 * @param   string    $field_data       The field POST data.
+	 * @param   array     $field_settings   The field settings.
+	 * @param   int|bool  $entry_id         The entry's ID, or FALSE if the user clicked "Preview".
+	 */
+	function save_field($field_data = '', $field_settings = array(), $entry_id = FALSE)
+	{
+	  $ret = '';
+	  
+	  $map_data = explode(',', $field_data);
+	  if (count($map_data) === 5)
+	  {
+	    $ret = array(
+	      'map_lat' => $map_data[0],
+	      'map_lng' => $map_data[1],
+	      'map_zoom' => $map_data[2],
+	      'pin_lat' => $map_data[3],
+	      'pin_lng' => $map_data[4]
+	      );
+    }
+    
+    return $ret;
+	}
+	
+	
+	/**
 	 * Performs validation when the field settings are saved.
 	 * @param 		array 		$field_settings 			The field settings.
 	 * @return 		array 		The modified field settings.
@@ -335,7 +364,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	 */	
 	function _display_field($field_name, $field_data, $field_settings, $init)
 	{
-		global $LANG;
+		global $REGX, $LANG;
 
 		// Initialise the return variable.
 		$r = '';
@@ -346,11 +375,16 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		// Retrieve the API key from the site settings array.
 		$api_key = isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '';
 
-		// Retrieve the map coordinates from the field data array.
-		if ($field_data == '')
+		// Retrieve the map coordinates from the field data array.		
+		if ( ! is_array($field_data) OR count($field_data) !== 5)
 		{
-			$field_data = $field_settings['map_lat'] . ',' . $field_settings['map_lng'] . ',' . $field_settings['map_zoom'] . ',';
-			$field_data .= $field_settings['map_lat'] . ',' . $field_settings['map_lng'];
+		  $field_data = array(
+		    'map_lat' => $field_settings['map_lat'],
+		    'map_lng' => $field_settings['map_lng'],
+		    'map_zoom' => $field_settings['map_zoom'],
+		    'pin_lat' => $field_settings['map_lat'],
+		    'pin_lng' => $field_settings['map_lng']
+		    );
 		}
 
 		// Include our "global" scripts for the CP.
@@ -380,7 +414,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 			$r .= '<div class="hidden">';
 			
 			// The field to store the map data.
-			$r .= '<input type="hidden" name="' . $field_name . '" id="' . $field_name . '" value="' . $field_data .'" />';
+			$r .= '<input type="hidden" name="' . $field_name . '" id="' . $field_name . '" value="' . implode(',', $field_data) .'" />';
 		
 			// If we're not in the control panel (i.e. this is a SAEF), we also need to store the field formatting value.
 			if (isset($init['control_panel']) && $init['control_panel'] === FALSE)
@@ -408,10 +442,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		else
 		{
 			$map_field = $address_input = $address_submit = null;
-		}		
-
-		// Extract the field data into separate variables for use in our JS initialisation code.
-		list($map_lat, $map_lng, $map_zoom, $pin_lat, $pin_lng) = explode(',', $field_data);
+		}
 		
 		// Extract the options into separate variables for use in the our JS initialisation code.
 		// I'm sure there must be a more elegant way of doing this, but the following will do for now.
@@ -435,28 +466,28 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 
 	SJL.google_maps.push({
 		init : {
-			api_key					: '{$api_key}',
-			map_field				: '{$map_field}',
-			map_container		: '{$container_id}',
-			map_lat					: {$map_lat},
-			map_lng					: {$map_lng},
-			map_zoom				: {$map_zoom},
-			pin_lat					: {$pin_lat},
-			pin_lng					: {$pin_lng},
-			address_input 	: '{$address_input}',
-			address_submit	: '{$address_submit}'
+			api_key: '{$api_key}',
+			map_field: '{$map_field}',
+			map_container: '{$container_id}',
+			map_lat: {$field_data['map_lat']},
+			map_lng: {$field_data['map_lng']},
+			map_zoom: {$field_data['map_zoom']},
+			pin_lat: {$field_data['pin_lat']},
+			pin_lng: {$field_data['pin_lng']},
+			address_input: '{$address_input}',
+			address_submit: '{$address_submit}'
 		},
 		options : {
-			ui_zoom					: '{$ui_zoom}',
-			ui_scale				: '{$ui_scale}',
-			ui_overview			: '{$ui_overview}',
-			ui_map_type     : '{$ui_map_type}',
-			map_drag				: '{$map_drag}',
-			map_click_zoom	: '{$map_click_zoom}',
-			map_scroll_zoom : '{$map_scroll_zoom}',
-			pin_drag				: '{$pin_drag}',
-			background			: '{$background}',
-			map_types       : '{$map_types}'
+			ui_zoom: '{$ui_zoom}',
+			ui_scale: '{$ui_scale}',
+			ui_overview: '{$ui_overview}',
+			ui_map_type: '{$ui_map_type}',
+			map_drag: '{$map_drag}',
+			map_click_zoom: '{$map_click_zoom}',
+			map_scroll_zoom: '{$map_scroll_zoom}',
+			pin_drag: '{$pin_drag}',
+			background: '{$background}',
+			map_types: '{$map_types}'
 		}
 	});
 
@@ -599,7 +630,7 @@ JAVASCRIPT;
 			$field_data = $pin_lat . ',' . $pin_lng . ',' . $map_zoom . ',' . $pin_lat . ',' . $pin_lng;
 		}
 		
-		// Initialisation done, let's get swapping.			
+		// Initialisation done, let's get swapping.
 		$r = preg_replace(
 			'/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s',
 			$this->_display_field('field_id_' . $FF->field_id, $field_data, $field_settings, $init),
