@@ -357,7 +357,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	/**
 	 * Displays the field editor in the CP or a SAEF.
 	 * @param 		string	 	$field_name 			The field name.
-	 * @param 		string 		$field_data 			The previously-saved field data.
+	 * @param 		array 		$field_data 			The previously-saved field data.
 	 * @param 		array 		$field_settings		The field settings.
 	 * @param			array 		$init 						Initialisation object specifying UI and usage options.
 	 * @return 		string 		The HTML to output.
@@ -501,7 +501,7 @@ JAVASCRIPT;
 	/**
 	 * Displays the field in the CP.
 	 * @param 		string	 	$field_name 			The field name.
-	 * @param 		string 		$field_data 			The previously-saved field data.
+	 * @param 		array 		$field_data 			The previously-saved field data.
 	 * @param 		arrray 		$field_settings		The field settings.
 	 * @return 		string 		The HTML to output.
 	 */
@@ -534,7 +534,7 @@ JAVASCRIPT;
 	 * Displays the field in the exp:weblog:entries template.
 	 * @param 	array 		$params 					Key / value pairs of the template tag parameters.
 	 * @param 	string 		$tagdata 					Contents of the template between the opening and closing tags, if it's a tag pair.
-	 * @param 	string 		$field_data				The previously-saved field data.
+	 * @param 	array 		$field_data				The previously-saved field data.
 	 * @param 	array 		$field_settings		The field settings.
 	 * @return 	string 		String of template markup.
 	 */
@@ -621,27 +621,28 @@ JAVASCRIPT;
 		  $init['options']['map_types'] = $params['map_types'];   // Leave it as a pipe-delimited string.
 		}
 		
-		// Extract the current field data.
-		list($map_lat, $map_lng, $map_zoom, $pin_lat, $pin_lng) = explode(',', $field_data);
-		
 		// Do we need to center the map on the pin location?
 		if ($pin_center)
 		{
-			$field_data = $pin_lat . ',' . $pin_lng . ',' . $map_zoom . ',' . $pin_lat . ',' . $pin_lng;
+			$field_data['map_lat'] = $field_data['pin_lat'];
+			$field_data['map_lng'] = $field_data['pin_lng'];
 		}
+		
+		// This ID will be used if none has been specified in the init settings.
+		$field_id = 'entry_id_' . $FF->row['entry_id'] . '_field_id_' . $FF->field_id;
 		
 		// Initialisation done, let's get swapping.
 		$r = preg_replace(
 			'/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s',
-			$this->_display_field('field_id_' . $FF->field_id, $field_data, $field_settings, $init),
+			$this->_display_field($field_id, $field_data, $field_settings, $init),
 			$tagdata
 			);
 		
-		$r = $TMPL->swap_var_single('map_lat', $map_lat, $r);
-		$r = $TMPL->swap_var_single('map_lng', $map_lng, $r);
-		$r = $TMPL->swap_var_single('map_zoom', $map_zoom, $r);
-		$r = $TMPL->swap_var_single('pin_lat', $pin_lat, $r);
-		$r = $TMPL->swap_var_single('pin_lng', $pin_lng, $r);
+		$r = $TMPL->swap_var_single('map_lat', $field_data['map_lat'], $r);
+		$r = $TMPL->swap_var_single('map_lng', $field_data['map_lng'], $r);
+		$r = $TMPL->swap_var_single('map_zoom', $field_data['map_zoom'], $r);
+		$r = $TMPL->swap_var_single('pin_lat', $field_data['pin_lat'], $r);
+		$r = $TMPL->swap_var_single('pin_lng', $field_data['pin_lng'], $r);
 		
 		return $r;
 	}
