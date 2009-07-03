@@ -2,7 +2,7 @@
 
 /**
  * @package SL Google Map
- * @version 1.1.0
+ * @version 1.2.0
  * @author Stephen Lewis (http://experienceinternet.co.uk/)
  * @copyright Copyright (c) 2009, Stephen Lewis
  * @license http://creativecommons.org/licenses/by-sa/3.0 Creative Commons Attribution-Share Alike 3.0 Unported
@@ -24,7 +24,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	var $info = array(
 		'name'							=> 'SL Google Map',
-		'version'						=> '1.1.0',
+		'version'						=> '1.2.0',
 		'desc'							=> 'Google Map Field Type with full SAEF and weblogs tag support.',
 		'docs_url'					=> 'http://experienceinternet.co.uk/resources/details/sl-google-map/',
 		'versions_xml_url'	=> 'http://experienceinternet.co.uk/addon-versions.xml'
@@ -39,6 +39,99 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		);
 		
 		
+	/**
+	 * Performs house-keeping when upgrading from an older version of the extension.
+	 *
+	 * @param   string|bool   $from   The previous version, or FALSE if this is the initial installation.
+	 */
+	function update($from = FALSE)
+	{
+	  global $DB, $LANG;
+	  
+	  if ($from !== FALSE && $from < '1.2.0')
+	  {
+	    /**
+	     * Changed the way the data is stored in version 1.2.0. Instead of a pipe-delimeted
+	     * string, we now use a much more robust serialised array.
+	     *
+	     * Need to convert the old data to use the new format.
+	     */
+	     
+	    // Retrieve the FF field type ID.
+	    $db_fieldtype = $DB->query('SELECT `fieldtype_id`
+	      FROM `exp_ff_fieldtypes`
+	      WHERE `class` = "' . strtolower(get_class($this)) . '"'
+	      );
+	      
+	    if ($db_fieldtype->num_rows !== 1)
+	    {
+	      // Something has gone badly wrong here.
+	      exit ($LANG->line('update_error'));
+	    }
+	    
+	    // Retrieve all the SL Google Map weblog fields.
+	    $db_field_ids = $DB->query('SELECT `field_id`
+	      FROM `exp_weblog_fields`
+	      WHERE `field_type` = "ftype_id_' . $db_fieldtype->row['fieldtype_id'] . '"'
+	      );
+	      
+	    // Loop through the SL Google Map fields, updating the data.
+	    $field_ids = array();
+	    foreach ($db_field_ids->result AS $db_field_id)
+	    {
+	      $field_ids[] = 'field_id_' . $db_field_id['field_id'];
+	    }
+	    
+	    if (count($field_ids) > 0)
+	    {
+	      $sql = 'SELECT `entry_id`, ' . implode(', ', $field_ids) . ' FROM `exp_weblog_data` ';
+	      $sql .= 'WHERE ';
+	      foreach ($field_ids AS $field_id)
+	      {
+	        $sql .= $field_id . ' <> "" AND ';
+	      }
+	      $sql = rtrim($sql, ' AND ');
+	      
+	      $db_weblog_data = $DB->query($sql);
+	      
+	      // Loop through the weblog data records.
+	      foreach ($db_weblog_data->result AS $db_data)
+	      {
+	        // Loop through each of the SL Google Map fields for
+	        // the current record, and convert the data if required.
+	        foreach ($field_ids AS $field_id)
+	        {
+	          if ($db_data[$field_id] !== '')
+	          {
+	            list($map_lat, $map_lng, $map_zoom, $pin_lat, $pin_lng) = explode(',', $db_data[$field_id]);
+              $update_array[$field_id] = addslashes(serialize(
+                array(
+                  'map_lat' => $map_lat,
+                  'map_lng' => $map_lng,
+                  'map_zoom' => $map_zoom,
+                  'pin_lat' => $pin_lat,
+                  'pin_lng' => $pin_lng
+                  )
+                ));
+	          }
+	          else
+	          {
+	            $update_array[$field_id] = '';
+	          }
+	          
+	          // Update the record.
+	          $DB->query($DB->update_string(
+	            'exp_weblog_data',
+	            $update_array,
+	            'entry_id = "' . $db_data['entry_id'] . '"'
+	            ));
+	        }
+	      }
+	    }
+	  }
+	}
+	
+	
 	/**
 	 * Displays the site-wide settings in the CP.
 	 * @return 		string 		HTML to be inserted into the field type settings block.
@@ -394,6 +487,7 @@ JAVASCRIPT;
 				'ui_zoom'					=> TRUE,
 				'ui_scale'				=> TRUE,
 				'ui_overview'			=> TRUE,
+				'ui_map_type'     => TRUE,
 				'map_drag'				=> TRUE,
 				'map_click_zoom'	=> TRUE,
 				'map_scroll_zoom'	=> FALSE,
@@ -443,6 +537,7 @@ JAVASCRIPT;
 					'ui_zoom'					=> TRUE,
 					'ui_scale'				=> TRUE,
 					'ui_overview'			=> TRUE,
+					'ui_map_type'     => TRUE,
 					'map_drag'				=> TRUE,
 					'map_click_zoom'	=> TRUE,
 					'map_scroll_zoom'	=> FALSE,

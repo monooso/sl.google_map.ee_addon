@@ -30,6 +30,8 @@ $L = array(
 	'publish_no_javascript'			=> "Sorry, but you need JavaScript enabled in order to use this feature.",
 	'publish_finder_label'			=> "Enter an address (e.g. Oxford Street, London) or a postal code:",
 	'publish_finder_button'			=> "Find It",
+	
+	'update_error'  => 'Sorry, there was a problem upgrading the SL Google Map extension.',
 		
 	// END
 	'' => ''	
