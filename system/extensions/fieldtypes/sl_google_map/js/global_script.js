@@ -13,13 +13,14 @@ if (typeof(SJL.SLGoogleMap) == 'undefined' || ( ! SJL.SLGoogleMap instanceof Obj
 		function Map(init, options) {
 						
 			// Check that we have the required information.
-			if ( ! init instanceof Object ||
-				typeof(init.map_container) == 'undefined' ||
-				typeof(init.map_lat) == 'undefined' ||
-				typeof(init.map_lng) == 'undefined' ||
-				typeof(init.map_zoom) == 'undefined' ||
-				typeof(init.pin_lat) == 'undefined' ||
-				typeof(init.pin_lng) == 'undefined') {
+			if (init == null
+				|| typeof(init) != 'object'
+				|| typeof(init.map_container) == 'undefined'
+				|| typeof(init.map_lat) == 'undefined'
+				|| typeof(init.map_lng) == 'undefined'
+				|| typeof(init.map_zoom) == 'undefined'
+				|| typeof(init.pin_lat) == 'undefined'
+				|| typeof(init.pin_lng) == 'undefined') {
 					return false;
 				}
 				

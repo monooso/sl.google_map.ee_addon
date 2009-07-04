@@ -409,22 +409,15 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		$r .= '</div>';
 		
 		// Additional doo-hickeys if the map is in "editor" mode.
-		if ( ! isset($init['editor']) OR $init['editor'] !== FALSE)
+		if ( ! isset($init['control_panel']) OR $init['control_panel'] === FALSE)
 		{
+		  $map_field = $address_input = $address_submit = null;
+		}
+		else
+		{
+		  // The field to store the map data.
 			$r .= '<div class="hidden">';
-			
-			// The field to store the map data.
-			$r .= '<input type="hidden" name="' . $field_name . '" id="' . $field_name . '" value="' . implode(',', $field_data) .'" />';
-		
-			// If we're not in the control panel (i.e. this is a SAEF), we also need to store the field formatting value.
-			if (isset($init['control_panel']) && $init['control_panel'] === FALSE)
-			{
-				$r .= '<input type="hidden"' .
-								' name="' . str_replace('field_id_', 'field_ft_', $field_name) . '"' .
-								' id="' . str_replace('field_id_', 'field_ft_' , $field_name) . '"' .
-								' value="none" />';
-			}
-			
+			$r .= '<input type="hidden" name="' . $field_name . '" id="' . $field_name . '" value="' . implode(',', $field_data) .'" />';			
 			$r .='</div>';
 
 			// The address finder.
@@ -438,10 +431,6 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 			$map_field 			= $field_name;
 			$address_input 	= $field_name . '_address_input';
 			$address_submit = $field_name . '_address_submit';
-		}
-		else
-		{
-			$map_field = $address_input = $address_submit = null;
 		}
 		
 		// Extract the options into separate variables for use in the our JS initialisation code.
@@ -512,7 +501,6 @@ JAVASCRIPT;
 		
 		// Call the function that does all the donkey work.			
 		$init = array(
-			'editor'				=> TRUE,
 			'control_panel'	=> TRUE,
 			'options'				=> array(
 				'ui_zoom'					=> TRUE,
@@ -551,46 +539,16 @@ JAVASCRIPT;
 			$tagdata
 			);
 		
-		if (isset($params['edit']) &&
-			(strtolower($params['edit']) == 'y' ||
-			strtolower($params['edit']) == 'yes' ||
-			strtolower($params['edit']) == 'true')
-		)
-		{
-			// As it's an editor, we set some sensible defaults...
-			$init = array(
-				'id'						=> (isset($params['id']) ? $params['id'] : ''),
-				'class'					=> (isset($params['class']) ? $params['class'] : ''),
-				'editor'				=> TRUE,
-				'control_panel'	=> FALSE,
-				'fallback'			=> $fallback,
-				'options'				=> array(
-					'ui_zoom'					=> TRUE,
-					'ui_scale'				=> TRUE,
-					'ui_overview'			=> TRUE,
-					'ui_map_type'     => TRUE,
-					'map_drag'				=> TRUE,
-					'map_click_zoom'	=> TRUE,
-					'map_scroll_zoom'	=> FALSE,
-					'pin_drag'				=> TRUE,
-					'background'			=> (isset($params['background']) ? $params['background'] : ''),
-					)
-				);
-		}
-		else
-		{
-			$init = array(
-				'id'						=> (isset($params['id']) ? $params['id'] : ''),
-				'class'					=> (isset($params['class']) ? $params['class'] : ''),
-				'editor'				=> FALSE,
-				'control_panel'	=> FALSE,
-				'fallback'			=> $fallback,
-				'options'				=> array(
-					'background'	=> (isset($params['background']) ? $params['background'] : '')
-					)
-				);
-		}
-		
+		$init = array(
+			'id'						=> (isset($params['id']) ? $params['id'] : ''),
+			'class'					=> (isset($params['class']) ? $params['class'] : ''),
+			'control_panel'	=> FALSE,
+			'fallback'			=> $fallback,
+			'options'				=> array(
+				'background'	=> (isset($params['background']) ? $params['background'] : '')
+				)
+			);
+
 		// Retrieve settings from the tag parameters.
 		if (isset($params['controls']))
 		{
