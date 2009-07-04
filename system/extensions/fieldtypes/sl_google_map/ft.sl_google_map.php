@@ -538,10 +538,39 @@ JAVASCRIPT;
 			'$1',
 			$tagdata
 			);
+			
+		/** 
+		 * It doesn't appear to be possible to use weblog variables in the field
+		 * tag ({entry_id} for example). As a compromise, we allow people to use
+	   * square brackets around weblog variables in the ID and class parameters
+	   * ([entry_id], for example).
+		 */
 		
+		if ( ! isset($params['id'])) $params['id'] = '';
+		if ( ! isset($params['class'])) $params['class'] = '';
+		
+		foreach ($FF->row AS $prop_id => $prop_data)
+		{
+		  if (is_string($prop_data))
+		  {
+		    $params['id'] = preg_replace(
+  		    '/\[' . $prop_id . '\]/i',
+  		    $prop_data,
+  		    $params['id']
+    			);
+    			
+    		$params['class'] = preg_replace(
+  		    '/\[' . $prop_id . '\]/i',
+  		    $prop_data,
+  		    $params['class']
+    			);
+		  }
+		}
+		
+		// Create the initialisation array.
 		$init = array(
-			'id'						=> (isset($params['id']) ? $params['id'] : ''),
-			'class'					=> (isset($params['class']) ? $params['class'] : ''),
+			'id'						=> $params['id'],
+			'class'					=> $params['class'],
 			'control_panel'	=> FALSE,
 			'fallback'			=> $fallback,
 			'options'				=> array(
@@ -602,8 +631,6 @@ JAVASCRIPT;
 		$r = $TMPL->swap_var_single('map_zoom', $field_data['map_zoom'], $r);
 		$r = $TMPL->swap_var_single('pin_lat', $field_data['pin_lat'], $r);
 		$r = $TMPL->swap_var_single('pin_lng', $field_data['pin_lng'], $r);
-		
-		// Replace the standard weblog single variables.
 		
 		return $r;
 	}
