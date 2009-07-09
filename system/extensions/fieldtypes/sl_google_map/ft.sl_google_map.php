@@ -361,7 +361,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		}
 
 		// Include our "global" scripts for the CP.
-		if ( ! isset($this->global_script_included) && ( ! isset($init['control_panel']) OR $init['control_panel'] !== FALSE))
+		if ( ! isset($this->global_script_included) && isset($init['control_panel']) && $init['control_panel'] === TRUE)
 		{
 			$this->global_script_included = TRUE;
 
@@ -381,8 +381,8 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		$r .= (isset($init['fallback']) && $init['fallback'] != '') ? $init['fallback'] : '<p>' . $LANG->line('publish_no_javascript') . '</p>';
 		$r .= '</div>';
 		
-		// Additional doo-hickeys if the map is in "editor" mode.
-		if ( ! isset($init['control_panel']) OR $init['control_panel'] === FALSE)
+		// Only add "editor" doo-hickeys if we're in the CP.
+		if ( ! isset($init['control_panel']) OR $init['control_panel'] !== TRUE)
 		{
 		  $map_field = $address_input = $address_submit = null;
 		}
