@@ -18,7 +18,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
   const SATELLITE  = 'satellite';  
 	
 	var $requires = array(
-		'ff'		    => '1.0.5',
+		'ff'		    => '1.2.0',
 		'cp_jquery' => '1.1'
 		);
 	
@@ -34,8 +34,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		'map_lat'		=> 39.368,
 		'map_lng'		=> -1.406,
 		'map_zoom'	=> 1,
-		'map_size'	=> 400,
-		'map_type'  => 'normal'
+		'map_size'	=> 400
 		);
 		
 		
@@ -184,19 +183,6 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 				$sd->select('map_zoom', isset($this->site_settings['map_zoom']) ? $this->site_settings['map_zoom'] : $this->default_site_settings['map_zoom'], $options)
 				)
 			);
-			
-		// Default map type.
-		$options = array(
-		  Sl_google_map::HYBRID     => $LANG->line('map_type_hybrid'),
-			Sl_google_map::NORMAL     => $LANG->line('map_type_normal'),
-			Sl_google_map::PHYSICAL   => $LANG->line('map_type_physical'),
-			Sl_google_map::SATELLITE  => $LANG->line('map_type_satellite')
-		  );
-		
-		$r .= $sd->row(array(
-		  $sd->label('default_map_type'),
-		  $sd->select('map_type', isset($this->site_settings['map_type']) ? $this->site_settings['map_type'] : $this->default_site_settings['map_type'], $options)
-		  ));
 				
 		// Close the settings block.
 		$r .= $sd->block_c();
@@ -269,19 +255,6 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 			$sd->label('default_zoom'),
 			$sd->select('map_zoom', isset($field_settings['map_zoom']) ? $field_settings['map_zoom'] : $this->site_settings['map_zoom'], $options)
 			));
-			
-		// Default map type.
-		$options = array(
-		  Sl_google_map::HYBRID     => $LANG->line('map_type_hybrid'),
-			Sl_google_map::NORMAL     => $LANG->line('map_type_normal'),
-			Sl_google_map::PHYSICAL   => $LANG->line('map_type_physical'),
-			Sl_google_map::SATELLITE  => $LANG->line('map_type_satellite')
-		  );
-		
-		$c .= $sd->row(array(
-		  $sd->label('default_map_type'),
-		  $sd->select('map_type', isset($field_settings['map_type']) ? $field_settings['map_type'] : $this->site_settings['map_type'], $options)
-		  ));
 
 		// Close the table.
 		$c .= $sd->block_c();
@@ -355,7 +328,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	
 	/**
-	 * Displays the field editor in the CP or a SAEF.
+	 * Displays the field editor in the CP, or the map output in a template.
 	 * @param 		string	 	$field_name 			The field name.
 	 * @param 		array 		$field_data 			The previously-saved field data.
 	 * @param 		array 		$field_settings		The field settings.
@@ -510,7 +483,11 @@ JAVASCRIPT;
 				'map_drag'				=> TRUE,
 				'map_click_zoom'	=> TRUE,
 				'map_scroll_zoom'	=> FALSE,
-				'pin_drag'				=> TRUE
+				'pin_drag'				=> TRUE,
+				'map_types'       => Sl_google_map::NORMAL . '|' .
+				  Sl_google_map::SATELLITE . '|' .
+				  Sl_google_map::HYBRID . '|' .
+				  Sl_google_map::PHYSICAL
 				)
 			);
 			
