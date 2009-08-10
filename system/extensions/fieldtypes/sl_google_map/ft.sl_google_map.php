@@ -56,22 +56,10 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	     * Need to convert the old data to use the new format.
 	     */
 	     
-	    // Retrieve the FF field type ID.
-	    $db_fieldtype = $DB->query('SELECT `fieldtype_id`
-	      FROM `exp_ff_fieldtypes`
-	      WHERE `class` = "' . strtolower(get_class($this)) . '"'
-	      );
-	      
-	    if ($db_fieldtype->num_rows !== 1)
-	    {
-	      // Something has gone badly wrong here.
-	      exit ($LANG->line('update_error'));
-	    }
-	    
 	    // Retrieve all the SL Google Map weblog fields.
 	    $db_field_ids = $DB->query('SELECT `field_id`
 	      FROM `exp_weblog_fields`
-	      WHERE `field_type` = "ftype_id_' . $db_fieldtype->row['fieldtype_id'] . '"'
+	      WHERE `field_type` = "ftype_id_' . $this->_fieldtype_id . '"'
 	      );
 	      
 	    // Loop through the SL Google Map fields, updating the data.
