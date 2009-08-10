@@ -137,7 +137,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		
 		// Site-wide settings.
 		$r .= $sd->block('sitewide_settings');
-		$r .= $sd->info_row('settings_tip');
+		$r .= $sd->info_row('settings_tip', FALSE);
 		
 		// API key.
 		$r .= $sd->row(array(
