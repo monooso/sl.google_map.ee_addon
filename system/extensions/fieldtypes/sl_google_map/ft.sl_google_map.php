@@ -37,6 +37,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		'map_size'	=> 400
 		);
 		
+	var $google_maps_api_key_conf = FALSE;
 		
 	/**
 	 * Performs house-keeping when upgrading from an older version of the extension.
@@ -120,6 +121,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	  }
 	}
 	
+
 	
 	/**
 	 * Displays the site-wide settings in the CP.
@@ -127,7 +129,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	 */
 	function display_site_settings()
 	{
-	  global $LANG;
+	  global $LANG, $PREFS;
 	  
 		// Initialise our return variable.
 		$r = '';
@@ -138,12 +140,36 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		// Site-wide settings.
 		$r .= $sd->block('sitewide_settings');
 		$r .= $sd->info_row('settings_tip', FALSE);
-		
+ 
+    
+    $this->google_maps_api_key_conf = isset($PREFS->core_ini['sl_go_api']) ? $PREFS->core_ini['sl_go_api'] : FALSE;
+    
+		if ($this->google_maps_api_key_conf) 
+		{
+      
+      $attr = array(
+        'extras' => 'disabled="disabled"'
+        );
+      
+		// API key.
+		$r .= $sd->row(array(
+				$sd->label('api_key_conf'),
+				$sd->text('api_key', $this->google_maps_api_key_conf, $attr)
+				));
+
+		} else {
+
 		// API key.
 		$r .= $sd->row(array(
 				$sd->label('api_key'),
 				$sd->text('api_key', isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '')
 				));
+
+
+		}
+
+
+
 				
 		// Default latitude.
 		$r .= $sd->row(
@@ -325,7 +351,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	 */	
 	function _display_field($field_name, $field_data, $field_settings, $init)
 	{
-		global $REGX, $LANG;
+		global $REGX, $LANG, $PREFS;
 
 		// Initialise the return variable.
 		$r = '';
@@ -334,7 +360,13 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		$LANG->fetch_language_file('sl_google_map');
 
 		// Retrieve the API key from the site settings array.
-		$api_key = isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '';
+    $this->google_maps_api_key_conf = $PREFS->core_ini['sl_go_api'];
+		if ($this->google_maps_api_key_conf) 
+		{
+			$api_key = $this->google_maps_api_key_conf;	
+		} else {
+		  $api_key = isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '';
+		}
 
 		// Retrieve the map coordinates from the field data array.		
 		if ( ! is_array($field_data) OR count($field_data) !== 5)

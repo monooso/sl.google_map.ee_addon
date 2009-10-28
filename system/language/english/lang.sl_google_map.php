@@ -6,9 +6,10 @@ $L = array(
 	'select_field'			=> "Select a weblog field",
 	
 	'sitewide_settings'	=> "SL Google Map Settings",
-	'settings_tip'			=> 'Tip: You can find the latitude and longitude for a location <a href="http://itouchmap.com/latlong.html" title="Find the latitude and longitude of a loction">using this website</a>.',
+	'settings_tip'			=> 'Tip: You can find the latitude and longitude for a location <a href="http://itouchmap.com/latlong.html" title="Find the latitude and longitude of a location">using this website</a>.',
 	'general_settings'	=> "General Settings",
 	'api_key'						=> "Enter your Google Maps API key",
+	'api_key_conf'			=> "Your Google Maps API key is in config.php:",
 	
 	'latitude_field'		=> "Store the latitude in",
 	'longitude_field'		=> "Store the longitude in",
