@@ -141,35 +141,29 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		$r .= $sd->block('sitewide_settings');
 		$r .= $sd->info_row('settings_tip', FALSE);
  
-    
+    // API key.
     $this->google_maps_api_key_conf = isset($PREFS->core_ini['sl_go_api']) ? $PREFS->core_ini['sl_go_api'] : FALSE;
-    
+
 		if ($this->google_maps_api_key_conf) 
 		{
-      
       $attr = array(
         'extras' => 'disabled="disabled"'
-        );
+      );
       
-		// API key.
-		$r .= $sd->row(array(
-				$sd->label('api_key_conf'),
-				$sd->text('api_key', $this->google_maps_api_key_conf, $attr)
-				));
+  		$r .= $sd->row(array(
+  				$sd->label('api_key_conf'),
+  				$sd->text('api_key', $this->google_maps_api_key_conf, $attr)
+  				));
 
-		} else {
+		} 
+		else 
+		{
 
-		// API key.
-		$r .= $sd->row(array(
-				$sd->label('api_key'),
-				$sd->text('api_key', isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '')
-				));
-
-
+  		$r .= $sd->row(array(
+  				$sd->label('api_key'),
+  				$sd->text('api_key', isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '')
+  				));
 		}
-
-
-
 				
 		// Default latitude.
 		$r .= $sd->row(
@@ -360,7 +354,7 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 		$LANG->fetch_language_file('sl_google_map');
 
 		// Retrieve the API key from the site settings array.
-    $this->google_maps_api_key_conf = $PREFS->core_ini['sl_go_api'];
+		$this->google_maps_api_key_conf = isset($PREFS->core_ini['sl_go_api']) ? $PREFS->core_ini['sl_go_api'] : FALSE;
 		if ($this->google_maps_api_key_conf) 
 		{
 			$api_key = $this->google_maps_api_key_conf;	
