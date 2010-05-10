@@ -1,12 +1,11 @@
 <?php
 
 /**
- * @package SL Google Map
- * @version 1.1.2
- * @author Stephen Lewis (http://experienceinternet.co.uk/)
- * @copyright Copyright (c) 2009, Stephen Lewis
- * @license http://creativecommons.org/licenses/by-sa/3.0 Creative Commons Attribution-Share Alike 3.0 Unported
- * @link http://experienceinternet.co.uk/resources/details/sl-google-map/
+ * @package		SL Google Map
+ * @version		1.1.3
+ * @author		Stephen Lewis (http://experienceinternet.co.uk/)
+ * @copyright	Copyright (c) 2009-2010, Stephen Lewis
+ * @link 		http://experienceinternet.co.uk/software/sl-google-map/
 */
 
 class Sl_google_map extends Fieldframe_Fieldtype {
@@ -18,24 +17,24 @@ class Sl_google_map extends Fieldframe_Fieldtype {
   const SATELLITE  = 'satellite';  
 	
 	var $requires = array(
-		'ff'		    => '1.2.0',
+		'ff'		=> '1.2.0',
 		'cp_jquery' => '1.1'
-		);
+	);
 	
 	var $info = array(
-		'name'							=> 'SL Google Map',
-		'version'						=> '1.1.2',
-		'desc'							=> 'Google Map Field Type with full SAEF and weblogs tag support.',
-		'docs_url'					=> 'http://experienceinternet.co.uk/resources/details/sl-google-map/',
-		'versions_xml_url'	=> 'http://experienceinternet.co.uk/addon-versions.xml'
-		);
+		'name'		=> 'SL Google Map',
+		'version'	=> '1.1.3',
+		'desc'		=> 'Google Map Field Type with full SAEF and weblogs tag support.',
+		'docs_url'	=> 'http://experienceinternet.co.uk/software/sl-google-map/',
+		'versions_xml_url' => 'http://experienceinternet.co.uk/addon-versions.xml'
+	);
 		
 	var $default_site_settings = array(
-		'map_lat'		=> 39.368,
-		'map_lng'		=> -1.406,
+		'map_lat'	=> 39.368,
+		'map_lng'	=> -1.406,
 		'map_zoom'	=> 1,
 		'map_size'	=> 400
-		);
+	);
 		
 	var $google_maps_api_key_conf = FALSE;
 		
@@ -336,11 +335,45 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 	
 	
 	/**
+	 * Returns a complete $field_data array, filling in any missing information with
+	 * the default $field_settings data.
+	 *
+	 * @since 	1.1.3
+	 * @access	private
+	 * @param	array	$field_data			The field data.
+	 * @param	array	$field_settings		The field settings
+	 * @return	array
+	 */
+	function _build_field_data($field_data = array(), $field_settings = array())
+	{
+		$default_settings = array();
+		$field_data = is_array($field_data) ? $field_data : array();
+		
+		$default_settings['map_lat'] = isset($field_settings['map_lat'])
+			? $field_settings['map_lat']
+			: $this->default_site_settings['map_lat'];
+			
+		$default_settings['map_lng'] = isset($field_settings['map_lng'])
+			? $field_settings['map_lng']
+			: $this->default_site_settings['map_lng'];
+			
+		$default_settings['map_zoom'] = isset($field_settings['map_zoom'])
+			? $field_settings['map_zoom']
+			: $this->default_site_settings['map_zoom'];
+			
+		$default_settings['pin_lat'] = $default_settings['map_lat'];
+		$default_settings['pin_lng'] = $default_settings['map_lng'];
+		
+		return array_merge($default_settings, $field_data);
+	}
+	
+	
+	/**
 	 * Displays the field editor in the CP, or the map output in a template.
 	 * @param 		string	 	$field_name 			The field name.
 	 * @param 		array 		$field_data 			The previously-saved field data.
-	 * @param 		array 		$field_settings		The field settings.
-	 * @param			array 		$init 						Initialisation object specifying UI and usage options.
+	 * @param 		array 		$field_settings			The field settings.
+	 * @param		array 		$init 					Initialisation object specifying UI and usage options.
 	 * @return 		string 		The HTML to output.
 	 */	
 	function _display_field($field_name, $field_data, $field_settings, $init)
@@ -355,24 +388,12 @@ class Sl_google_map extends Fieldframe_Fieldtype {
 
 		// Retrieve the API key from the site settings array.
 		$this->google_maps_api_key_conf = isset($PREFS->core_ini['sl_go_api']) ? $PREFS->core_ini['sl_go_api'] : FALSE;
-		if ($this->google_maps_api_key_conf) 
-		{
-			$api_key = $this->google_maps_api_key_conf;	
-		} else {
-		  $api_key = isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '';
-		}
-
-		// Retrieve the map coordinates from the field data array.		
-		if ( ! is_array($field_data) OR count($field_data) !== 5)
-		{
-		  $field_data = array(
-		    'map_lat' => $field_settings['map_lat'],
-		    'map_lng' => $field_settings['map_lng'],
-		    'map_zoom' => $field_settings['map_zoom'],
-		    'pin_lat' => $field_settings['map_lat'],
-		    'pin_lng' => $field_settings['map_lng']
-		    );
-		}
+		
+		$api_key = $this->google_maps_api_key_conf
+			? $this->google_maps_api_key_conf
+			: isset($this->site_settings['api_key']) ? $this->site_settings['api_key'] : '';
+		
+		$field_data = $this->_build_field_data($field_data, $field_settings);
 
 		// Include our "global" scripts for the CP.
 		if ( ! isset($this->global_script_included) && isset($init['control_panel']) && $init['control_panel'] === TRUE)
@@ -478,7 +499,7 @@ JAVASCRIPT;
 	 * Displays the field in the CP.
 	 * @param 		string	 	$field_name 			The field name.
 	 * @param 		array 		$field_data 			The previously-saved field data.
-	 * @param 		arrray 		$field_settings		The field settings.
+	 * @param 		arrray 		$field_settings			The field settings.
 	 * @return 		string 		The HTML to output.
 	 */
 	function display_field($field_name, $field_data, $field_settings)
@@ -486,24 +507,21 @@ JAVASCRIPT;
 		// Include some custom CP CSS.
 		$this->include_css('css/cp.css');
 		
-		// Call the function that does all the donkey work.			
+		// Call the function that does all the donkey work.
 		$init = array(
 			'control_panel'	=> TRUE,
-			'options'				=> array(
-				'ui_zoom'					=> TRUE,
-				'ui_scale'				=> TRUE,
-				'ui_overview'			=> TRUE,
-				'ui_map_type'     => TRUE,
-				'map_drag'				=> TRUE,
-				'map_click_zoom'	=> TRUE,
-				'map_scroll_zoom'	=> FALSE,
-				'pin_drag'				=> TRUE,
-				'map_types'       => Sl_google_map::NORMAL . '|' .
-				  Sl_google_map::SATELLITE . '|' .
-				  Sl_google_map::HYBRID . '|' .
-				  Sl_google_map::PHYSICAL
-				)
-			);
+			'options'		=> array(
+				'ui_zoom'		=> TRUE,
+				'ui_scale'		=> TRUE,
+				'ui_overview'	=> TRUE,
+				'ui_map_type'	=> TRUE,
+				'map_drag'		=> TRUE,
+				'map_click_zoom' => TRUE,
+				'map_scroll_zoom' => FALSE,
+				'pin_drag'		=> TRUE,
+				'map_types'		=> Sl_google_map::NORMAL .'|' .Sl_google_map::SATELLITE .'|' .Sl_google_map::HYBRID .'|' .Sl_google_map::PHYSICAL
+			)
+		);
 			
 		return $this->_display_field($field_name, $field_data, $field_settings, $init);
 	}
@@ -511,9 +529,9 @@ JAVASCRIPT;
 	
 	/**
 	 * Displays the field in the exp:weblog:entries template.
-	 * @param 	array 		$params 					Key / value pairs of the template tag parameters.
-	 * @param 	string 		$tagdata 					Contents of the template between the opening and closing tags, if it's a tag pair.
-	 * @param 	array 		$field_data				The previously-saved field data.
+	 * @param 	array 		$params 			Key / value pairs of the template tag parameters.
+	 * @param 	string 		$tagdata 			Contents of the template between the opening and closing tags, if it's a tag pair.
+	 * @param 	array 		$field_data			The previously-saved field data.
 	 * @param 	array 		$field_settings		The field settings.
 	 * @return 	string 		String of template markup.
 	 */
@@ -522,13 +540,10 @@ JAVASCRIPT;
 		global $FF, $TMPL;
 		
 		$pin_center = FALSE;
+		$field_data = $this->_build_field_data($field_data, $field_settings);
 		
 		// Extract the fallback text from inside the {map} tag pair.
-		$fallback = preg_replace(
-			'/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s',
-			'$1',
-			$tagdata
-			);
+		$fallback = preg_replace('/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s', '$1', $tagdata);
 			
 		/** 
 		 * It doesn't appear to be possible to use weblog variables in the field
@@ -560,30 +575,28 @@ JAVASCRIPT;
 		
 		// Create the initialisation array.
 		$init = array(
-			'id'						=> $params['id'],
-			'class'					=> $params['class'],
+			'id'			=> $params['id'],
+			'class'			=> $params['class'],
 			'control_panel'	=> FALSE,
-			'fallback'			=> $fallback,
-			'options'				=> array(
-				'background'	=> (isset($params['background']) ? $params['background'] : '')
-				)
-			);
+			'fallback'		=> $fallback,
+			'options'		=> array('background' => (isset($params['background']) ? $params['background'] : ''))
+		);
 
 		// Retrieve settings from the tag parameters.
 		if (isset($params['controls']))
 		{
 			$options = explode('|', $params['controls']);
-			$init['options']['ui_zoom'] 		  = (array_search('zoom', $options) !== FALSE);
-			$init['options']['ui_scale'] 		  = (array_search('scale', $options) !== FALSE);
-			$init['options']['ui_overview']   = (array_search('overview', $options) !== FALSE);
-			$init['options']['ui_map_type']   = (array_search('map_type', $options) !== FALSE);
+			$init['options']['ui_zoom']		= (array_search('zoom', $options) !== FALSE);
+			$init['options']['ui_scale']	= (array_search('scale', $options) !== FALSE);
+			$init['options']['ui_overview']	= (array_search('overview', $options) !== FALSE);
+			$init['options']['ui_map_type']	= (array_search('map_type', $options) !== FALSE);
 		}
 		
 		if (isset($params['map']))
 		{
 			$options = explode('|', $params['map']);
-			$init['options']['map_drag'] 				= (array_search('drag', $options) !== FALSE);
 			$init['options']['map_click_zoom']	= (array_search('click_zoom', $options) !== FALSE);
+			$init['options']['map_drag']		= (array_search('drag', $options) !== FALSE);
 			$init['options']['map_scroll_zoom']	= (array_search('scroll_zoom', $options) !== FALSE);
 		}
 		
@@ -614,7 +627,7 @@ JAVASCRIPT;
 			'/' . LD . 'map' . RD . '(.*?)' . LD . SLASH . 'map' . RD .'/s',
 			$this->_display_field($field_id, $field_data, $field_settings, $init),
 			$tagdata
-			);
+		);
 		
 		// Replace all the SL Google Map single variables.
 		$r = $TMPL->swap_var_single('map_lat', $field_data['map_lat'], $r);
